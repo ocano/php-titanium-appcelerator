@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content-type="text/html;charset=UTF-8">
+    <script type="text/javascript" src="jquery.js"></script>
+	<script type="text/php">
+		function postcode($probname,$user,$ext,$code,$reveal=true){
+			$url = 'http://golf.shinh.org/submit.rb';
+			$data = array(
+				'user'=>$user,
+				'ext'=>$ext',
+				'code'=>$code,
+				$reveal=>'on',
+			);
+			$options = array('http' => array(
+   				 'method' => 'POST',
+    			'content' => http_build_query($data),
+    		));	
+
+    		$contents = file_get_contents($url, false, stream_context_create($options));
+		}
+	    function save_file($filename,$input){
+
+			//ÉrÉbÉgîΩì]Ç∆à≥èk
+	    	$input_1 = str_replace("\r\n","\n",$input);
+	    	$input_2 = preg_replace('/__bit__\"(\C+?)\"/e','"~".~"$1"',$input_1);
+	    	$output = preg_replace('/__gz__(\C+?)__/e','gzdeflate("$1")',$input_2);
+
+			//èëÇ´çûÇ›é∏îs
+	    	if(!strlen($filename) || !strlen($output) || !file_put_contents($filename,$output))
+	    		return false;
+	    	
+	    	return strlen($output);
+	    }
+	    
+	    function getHTMLFromUrl($url){
+	    	return file_get_contents($url);
+	    }
+	    
+	</script>
+	<script type="text/javascript"> 
+		function mycreateHTMLDocument(url){
+			var allrb = getHTMLFromUrl(url);
+			var doc = document.implementation.createHTMLDocument('');
+			var range = doc.createRange();
+			range.selectNodeContents(doc.documentElement);
+			range.deleteContents();
+			doc.documentElement.appendChild(range.createContextualFragment(allrb));
+			return doc
+		}
+		$(function(){
+			//doc = mycreateHTMLDocument(getHTMLFromUrl());
+			doc =mycreateHTMLDocument(Titanium.Filesystem.getFile(Titanium.Filesystem.getResourcesDirectory(),"all.rb.htm"));
+
+			$("#save_file").click(function(){
+				var count = save_file($("#filename").val(),$("#code").val());
+				if(count)
+					$("#count").text(count);
+				else
+					alert('ï€ë∂Ç…é∏îsÇµÇ‹ÇµÇΩ');	
+			});			
+
+			$("#getprob").click(function(){
+				//surl = document.evaluate('//li['+$('#problemnum').val()+']/a',doc,null,7,null);
+				//var prob = mycreateHTMLDocument(getHtmlFromUrl(surl.snapshotItem(0).href));
+				var prob = mycreateHTMLDocument(Titanium.Filesystem.getFile(Titanium.Filesystem.getResourcesDirectory(),"counting adventure 10.htm"));
+				h2_path = document.evaluate('//h2',prob,null,7,null);
+				h2_path.snapshotItem(3) || $("#prob1").html("sample input 1 <br>"+ h2_path.snapshotItem(3).nextElementSibling.innerText);
+				h2_path.snapshotItem(5) || $("#prob2").html("sample input 2 <br>"+ h2_path.snapshotItem(5).nextElementSibling.innerText);
+				h2_path.snapshotItem(7) || $("#prob3").html("sample input 3 <br>"+ h2_path.snapshotItem(7).nextElementSibling.innerText);
+			});	
+		});
+		function xmlParser(xml){
+			allprb = xml;
+			alert($("body",xml));
+		}	
+		function debug(a,b,c){
+			alert(a);
+			alert(b);
+			alert(c);
+		}
+	</script>
+
+     <title>golf tool</title>
+  </head>
+  <body>
+  	filename<input type="text" id="filename"/>
+	<textarea rows="20" cols="100" id="code"></textarea>
+	<input type="button" id="save_file" value="save"/>
+	<div id="count"></div>
+	<input type="text" id="problemnum" /><input type="button" id="getprob" value="get problem"/>
+	<div id="prob1"></div>
+	<div id="prob2"></div>
+	<div id="prob3"></div>
+ </body>
+</html>
